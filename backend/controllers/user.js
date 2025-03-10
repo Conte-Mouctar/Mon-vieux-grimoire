@@ -23,6 +23,7 @@ exports.signUp = async (req, res, next) => {
 exports.login = async (req, res, next) => {
   try {
     const { email, password } = req.body;
+    console.log(email, password);
 
     const user = await User.findOne({ email });
     if (!user) {
@@ -34,7 +35,7 @@ exports.login = async (req, res, next) => {
       return res.status(401).json({ message: "Mot de passe incorect" });
     }
 
-    res.status(200).json({ message: "Connexion reussie" });
+    res.status(200).json({ userId: user._Id, token: "TOKEN" });
   } catch {
     res.status(500).json({ message: "Erreur serveur" });
   }
