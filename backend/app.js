@@ -1,20 +1,20 @@
 const express = require("express");
-const data = require("../frontend/public/data/data.json");
-const Book = require("./models/books");
 const mongoose = require("mongoose");
+
+const booksRoute = require("./routes/books");
+const userRoute = require("./routes/user");
+
+const app = express();
+app.use(express.json());
 
 mongoose
   .connect(
     "mongodb+srv://Mouctar_Conte:wYq2liPWUjZPz7wM@monvieuxgrimoire.uub2s.mongodb.net/?retryWrites=true&w=majority&appName=MonVieuxGrimoire"
   )
   .then(() => console.log("Connexion à MongoDB réussie !"))
-  .catch(() => console.log("Connexion à MongoDB échouée !"));
+  .catch(() => console.error("Connexion à MongoDB échouée :", error));
 
-const app = express();
-
-app.use(express.json());
-
-app.get((req, res, next) => {
+app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader(
     "Access-Control-Allow-Headers",
@@ -27,30 +27,7 @@ app.get((req, res, next) => {
   next();
 });
 
-/* app.get("/api/books", (req, res, next) => {
-  res.status(200).json(data);
-}); */
-
-app.get("/api/books", (req, res, next) => {
-  Book.find()
-    .then((books) => res.status(200).json(books))
-    .catch((error) => res.status(400).json({ error }));
-});
-
-app.get("/livre/:id", (req, res, next) => {
-  Book.findOne({ id: req.params.id })
-    .then((book) => res.status(200).json(book))
-    .catch((error) => res.status(404).json({ error }));
-});
-
-app.post("/api/books", (req, res, next) => {
-  const book = new Book({
-    ...req.body,
-  });
-  book
-    .save()
-    .then(() => res.status(201).json({ message: "Objet enregistré !" }))
-    .catch((error) => res.status(400).json({ error }));
-});
+app.use("/api/books", booksRoute);
+app.use("/api/auth", userRoute);
 
 module.exports = app;
