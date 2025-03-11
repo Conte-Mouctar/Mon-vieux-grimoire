@@ -1,5 +1,6 @@
 const User = require("../models/User");
 const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 
 exports.signUp = async (req, res, next) => {
   try {
@@ -23,7 +24,6 @@ exports.signUp = async (req, res, next) => {
 exports.login = async (req, res, next) => {
   try {
     const { email, password } = req.body;
-    console.log(email, password);
 
     const user = await User.findOne({ email });
     if (!user) {
@@ -35,7 +35,12 @@ exports.login = async (req, res, next) => {
       return res.status(401).json({ message: "Mot de passe incorect" });
     }
 
-    res.status(200).json({ userId: user._Id, token: "TOKEN" });
+    res.status(200).json({
+      userId: user._id,
+      token: jwt.sign({ userId: user._id }, "RANDOM_TOKEN_SECRET", {
+        expiresIn: "24h",
+      }),
+    });
   } catch {
     res.status(500).json({ message: "Erreur serveur" });
   }
