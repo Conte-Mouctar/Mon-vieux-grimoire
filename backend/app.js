@@ -1,11 +1,14 @@
 const express = require("express");
 const mongoose = require("mongoose");
+const path = require("path");
 
 const booksRoute = require("./routes/books");
 const userRoute = require("./routes/user");
 
 const app = express();
+
 app.use(express.json());
+app.use("/images", express.static(path.join(__dirname, "images")));
 
 mongoose
   .connect(

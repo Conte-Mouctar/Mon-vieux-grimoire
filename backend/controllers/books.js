@@ -1,4 +1,5 @@
 const Book = require("../models/Book");
+const fs = require("fs");
 
 exports.getAllBooks = async (req, res) => {
   try {
@@ -24,12 +25,23 @@ exports.getOneBook = async (req, res) => {
 
 exports.createBook = async (req, res) => {
   try {
-    const { title, author, year, genre, imageUrl, userId } = req.body;
-    if (!title || !author || !year || !genre || !imageUrl || !userId) {
+    const dataBook = JSON.parse(req.body.book);
+
+    const { title, author, year, genre, imageUrl } = req.body;
+    if (!title || !author || !year || !genre || !imageUrl) {
       return res.status(400).json({ error: "Tous les champs sont requis" });
     }
 
-    const newBook = new Book({ title, author, year, genre, imageUrl, userId });
+    const newBook = new Book({
+      title,
+      author,
+      year,
+      genre,
+      userId: req.auth.userId,
+      imageUrl: `${req.protocol}://${req.get("host")}/images/${
+        req.file.filename
+      }`,
+    });
     await newBook.save();
 
     res.status(201).json({ message: "Livre enregistré", book: newBook });
@@ -40,14 +52,35 @@ exports.createBook = async (req, res) => {
 
 exports.modifieBook = async (req, res) => {
   try {
-    const result = await Book.updateOne(
-      { _id: req.params.id },
-      { ...req.body }
+    const book = await Book.findOne({ _id: req.params.id });
+    if (!book) {
+      return res.status(404).json({ error: "Livre non trouvé !" });
+    }
+
+    if (book.userId !== req.auth.userId) {
+      return res.status(403).json({ error: "Non autorisé !" });
+    }
+
+    const bookObject = req.file
+      ? {
+          ...JSON.parse(req.body.book),
+          imageUrl: `${req.protocol}://${req.get("host")}/images/${
+            req.file.filename
+          }`,
+        }
+      : { ...req.body };
+
+    delete bookObject._userId;
+
+    const updatedBook = await Book.findByIdAndUpdate(
+      req.params.id,
+      bookObject,
+      { new: true }
     );
 
-    res.status(200).json({ message: "Objet modifié !" });
+    res.status(200).json({ message: "Livre modifié !", book: updatedBook });
   } catch (error) {
-    res.status(400).json({ error: "Erreur lors de la modification" });
+    res.status(500).json({ error: "Erreur serveur" });
   }
 };
 
@@ -58,8 +91,21 @@ exports.suprimeBook = async (req, res) => {
       return res.status(404).json({ message: "Livre non trouvé" });
     }
 
+    if (book.userId !== req.auth.userId) {
+      return res.status(403).json({ message: "Non autoriseé" });
+    }
+
+    const filename = book.imageUrl.split("/images/")[1];
+    if (filename) {
+      fs.unlink(`images/${filename}`, (err) => {
+        if (err)
+          console.error("Erreur lors de la suppression de l’image :", err);
+      });
+    }
+
     await Book.findByIdAndDelete(req.params.id);
-    res.status(200).json({ message: "Objet supprimé !" });
+
+    res.status(200).json({ message: "Livre supprimé avec succès !" });
   } catch (error) {
     res
       .status(400)
