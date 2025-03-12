@@ -27,10 +27,14 @@ exports.createBook = async (req, res) => {
   try {
     const dataBook = JSON.parse(req.body.book);
 
-    const { title, author, year, genre, imageUrl } = req.body;
-    if (!title || !author || !year || !genre || !imageUrl) {
+    const { title, author, year, genre } = dataBook;
+    if (!title || !author || !year || !genre || !req.file) {
       return res.status(400).json({ error: "Tous les champs sont requis" });
     }
+
+    const imageUrl = `${req.protocol}://${req.get("host")}/images/${
+      req.file.filename
+    }`;
 
     const newBook = new Book({
       title,
@@ -38,9 +42,8 @@ exports.createBook = async (req, res) => {
       year,
       genre,
       userId: req.auth.userId,
-      imageUrl: `${req.protocol}://${req.get("host")}/images/${
-        req.file.filename
-      }`,
+      imageUrl,
+      rating: [],
     });
     await newBook.save();
 
