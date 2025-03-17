@@ -115,3 +115,27 @@ exports.suprimeBook = async (req, res) => {
       .json({ message: "ID invalide ou erreur lors de la suppression" });
   }
 };
+
+exports.notationBook = (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const book = Book.find(id);
+    const { userId, rating } = req.body;
+
+    if (typeof rating !== "number" || rating < 0 || rating > 5) {
+      return res
+        .status(400)
+        .json({ message: "Veuillez entree un chifre entre 0 et 5 ! " });
+    }
+
+    const doublon = book.ratings.find((r) => r.userId === userId);
+    if (doublon) {
+      return res
+        .status(400)
+        .json({ message: "Vous avait deja donneé une note a ce livre !" });
+    }
+
+    book.ratings.push({ userId, rating });
+    res.status(200).json(book);
+  } catch (error) {}
+};
