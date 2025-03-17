@@ -116,11 +116,12 @@ exports.suprimeBook = async (req, res) => {
   }
 };
 
-exports.notationBook = (req, res, next) => {
+exports.notationBook = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const book = Book.find(id);
     const { userId, rating } = req.body;
+
+    const book = await Book.findById(id);
 
     if (typeof rating !== "number" || rating < 0 || rating > 5) {
       return res
@@ -136,6 +137,7 @@ exports.notationBook = (req, res, next) => {
     }
 
     book.ratings.push({ userId, rating });
+    await book.save();
     res.status(200).json(book);
   } catch (error) {}
 };
