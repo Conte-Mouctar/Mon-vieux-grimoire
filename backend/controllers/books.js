@@ -44,11 +44,13 @@ exports.createBook = async (req, res) => {
       userId: req.auth.userId,
       imageUrl,
       rating: [],
+      averageRating: 0,
     });
     await newBook.save();
 
     res.status(201).json({ message: "Livre enregistré", book: newBook });
   } catch (error) {
+    console.error(error);
     res.status(500).json({ error: "Erreur serveur" });
   }
 };
@@ -137,9 +139,9 @@ exports.notationBook = async (req, res, next) => {
 
     book.ratings.push({ userId, grade: rating });
 
-    const nombreNote = book.ratings.length;
-    const totalNote = book.ratings.reduce((acc, num) => acc + num.grade, 0);
-    book.averageRating = book.ratings > 0 ? totalNote / nombreNote : 0;
+    const total = book.ratings.reduce((acc, r) => acc + r.grade, 0);
+    const moyenne = total / book.ratings.length;
+    book.averageRating = moyenne.toFixed(1);
 
     await book.save();
     res.status(200).json(book);

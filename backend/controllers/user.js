@@ -38,7 +38,7 @@ exports.login = async (req, res, next) => {
 
     res.status(200).json({
       userId: user._id,
-      token: jwt.sign({ userId: user._id }, process.env.MANGO_DB, {
+      token: jwt.sign({ userId: user._id }, process.env.MON_TOKEN, {
         expiresIn: "24h",
       }),
     });
