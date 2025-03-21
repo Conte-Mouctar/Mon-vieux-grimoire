@@ -27,7 +27,8 @@ exports.createBook = async (req, res) => {
   try {
     const dataBook = JSON.parse(req.body.book);
 
-    const { title, author, year, genre } = dataBook;
+    const { title, author, year, genre, ratings } = dataBook;
+    const grade = ratings[0].grade;
     if (!title || !author || !year || !genre || !req.file) {
       return res.status(400).json({ error: "Tous les champs sont requis" });
     }
@@ -43,11 +44,11 @@ exports.createBook = async (req, res) => {
       genre,
       userId: req.auth.userId,
       imageUrl,
-      rating: [],
-      averageRating: 0,
+      ratings: ratings,
+      averageRating: grade,
     });
-    await newBook.save();
 
+    await newBook.save();
     res.status(201).json({ message: "Livre enregistré", book: newBook });
   } catch (error) {
     console.error(error);
@@ -145,7 +146,9 @@ exports.notationBook = async (req, res, next) => {
 
     await book.save();
     res.status(200).json(book);
-  } catch (error) {}
+  } catch (error) {
+    res.status(500).json({ message: "Erreur serveur" });
+  }
 };
 
 exports.bestBook = async (req, res, next) => {
