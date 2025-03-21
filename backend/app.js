@@ -1,3 +1,4 @@
+require("dotenv").config();
 const express = require("express");
 const mongoose = require("mongoose");
 const path = require("path");
@@ -11,9 +12,7 @@ app.use(express.json());
 app.use("/images", express.static(path.join(__dirname, "images")));
 
 mongoose
-  .connect(
-    "mongodb+srv://Mouctar_Conte:wYq2liPWUjZPz7wM@monvieuxgrimoire.uub2s.mongodb.net/?retryWrites=true&w=majority&appName=MonVieuxGrimoire"
-  )
+  .connect(process.env.MANGO_DB)
   .then(() => console.log("Connexion à MongoDB réussie !"))
   .catch(() => console.error("Connexion à MongoDB échouée :", error));
 

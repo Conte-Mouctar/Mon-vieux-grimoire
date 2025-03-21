@@ -110,9 +110,8 @@ exports.suprimeBook = async (req, res) => {
 
     res.status(200).json({ message: "Livre supprimé avec succès !" });
   } catch (error) {
-    res
-      .status(400)
-      .json({ message: "ID invalide ou erreur lors de la suppression" });
+    console.error("Erreur lors de la suppression :", error);
+    res.status(500).json({ message: "Erreur serveur" });
   }
 };
 
@@ -136,8 +135,30 @@ exports.notationBook = async (req, res, next) => {
         .json({ message: "Vous avait deja donneé une note a ce livre !" });
     }
 
-    book.ratings.push({ userId, rating });
+    book.ratings.push({ userId, grade: rating });
+
+    const nombreNote = book.ratings.length;
+    const totalNote = book.ratings.reduce((acc, num) => acc + num.grade, 0);
+    book.averageRating = book.ratings > 0 ? totalNote / nombreNote : 0;
+
     await book.save();
     res.status(200).json(book);
   } catch (error) {}
+};
+
+exports.bestBook = async (req, res, next) => {
+  try {
+    const book = await Book.find().sort({ averageRating: -1 }).limit(3);
+
+    if (book.length === 0) {
+      return res.status(404).json({ message: "Aucun livre noté trouvé" });
+    }
+    res.status(200).json(book);
+  } catch (error) {
+    console.error(
+      "Erreur lors de la récupération des meilleurs livres :",
+      error
+    );
+    res.status(500).json({ message: "Erreur serveur", error: error.message });
+  }
 };

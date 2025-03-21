@@ -1,3 +1,4 @@
+require("dotenv").config();
 const User = require("../models/User");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
@@ -37,7 +38,7 @@ exports.login = async (req, res, next) => {
 
     res.status(200).json({
       userId: user._id,
-      token: jwt.sign({ userId: user._id }, "RANDOM_TOKEN_SECRET", {
+      token: jwt.sign({ userId: user._id }, process.env.MANGO_DB, {
         expiresIn: "24h",
       }),
     });
