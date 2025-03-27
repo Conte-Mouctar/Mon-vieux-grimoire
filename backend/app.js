@@ -1,4 +1,5 @@
 require("dotenv").config();
+const rateLimit = require("express-rate-limit");
 const express = require("express");
 const mongoose = require("mongoose");
 const path = require("path");
@@ -29,6 +30,13 @@ app.use((req, res, next) => {
   next();
 });
 
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 100,
+  message: "Trop de requêtes, réessayez plus tard.",
+});
+
+app.use(limiter);
 app.use("/api/books", booksRoute);
 app.use("/api/auth", userRoute);
 

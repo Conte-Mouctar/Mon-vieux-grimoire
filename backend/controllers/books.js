@@ -76,6 +76,13 @@ exports.modifieBook = async (req, res) => {
 
     let filename = null;
     if (req.file) {
+      const ancienNom = book.imageUrl.split("/images/")[1];
+      const ancienneRoute = path.join("images", ancienNom);
+      fs.unlink(ancienneRoute, (err) => {
+        if (err) {
+          console.error("Erreur suppression image :", err);
+        }
+      });
       const name = req.file.originalname.split(" ").join("");
       const extention = path.extname(name);
       const basename = path.basename(name, extention);
@@ -148,7 +155,7 @@ exports.notationBook = async (req, res, next) => {
         .json({ message: "Veuillez entree un chifre entre 0 et 5 ! " });
     }
 
-    const doublon = book.ratings.find((r) => r.userId === userId);
+    const doublon = book.ratings.find((r) => r.userId === req.auth.userId);
     if (doublon) {
       return res
         .status(400)
