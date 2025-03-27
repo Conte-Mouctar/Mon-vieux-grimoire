@@ -42,7 +42,7 @@ exports.createBook = async (req, res) => {
     const routeImage = path.join("images", filename);
     await sharp(req.file.buffer)
       .webp({ quality: 80 })
-      .resize(600, 800)
+      .resize(400)
       .toFile(routeImage);
 
     const imageUrl = `${req.protocol}://${req.get("host")}/images/${filename}`;
