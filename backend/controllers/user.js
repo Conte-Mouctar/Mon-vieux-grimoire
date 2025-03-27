@@ -11,17 +11,6 @@ exports.signUp = async (req, res, next) => {
       return res.status(400).json({ message: "Tout les champs sont requis " });
     }
 
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      return res.status(400).json({ message: "Adresse email invalide." });
-    }
-
-    if (password.length < 8) {
-      return res.status(400).json({
-        message: "Le mot de passe doit contenir au moins 8 caracteres.",
-      });
-    }
-
     const mdpCryptee = await bcrypt.hash(password, 10);
 
     const newUser = new User({ email, password: mdpCryptee });
