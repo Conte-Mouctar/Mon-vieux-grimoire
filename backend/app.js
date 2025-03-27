@@ -1,8 +1,10 @@
 require("dotenv").config();
 const rateLimit = require("express-rate-limit");
+const mongoSanitize = require("express-mongo-sanitize");
 const express = require("express");
 const mongoose = require("mongoose");
 const path = require("path");
+const helmet = require("helmet");
 
 const booksRoute = require("./routes/books");
 const userRoute = require("./routes/user");
@@ -36,6 +38,8 @@ const limiter = rateLimit({
   message: "Trop de requêtes, réessayez plus tard.",
 });
 
+app.use(mongoSanitize());
+app.use(helmet());
 app.use(limiter);
 app.use("/api/books", booksRoute);
 app.use("/api/auth", userRoute);
