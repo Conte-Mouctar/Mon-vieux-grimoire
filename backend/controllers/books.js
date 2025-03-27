@@ -40,7 +40,10 @@ exports.createBook = async (req, res) => {
     const baseName = path.basename(name, extention);
     const filename = `${Date.now()}_${baseName}.webp`;
     const routeImage = path.join("images", filename);
-    await sharp(req.file.buffer).webp({ quality: 80 }).toFile(routeImage);
+    await sharp(req.file.buffer)
+      .webp({ quality: 80 })
+      .resize(600, 800)
+      .toFile(routeImage);
 
     const imageUrl = `${req.protocol}://${req.get("host")}/images/${filename}`;
 
@@ -89,7 +92,10 @@ exports.modifieBook = async (req, res) => {
       filename = `${Date.now()}_${basename}.webp`;
       const routeImage = path.join("images", filename);
 
-      await sharp(req.file.buffer).webp({ quality: 80 }).toFile(routeImage);
+      await sharp(req.file.buffer)
+        .webp({ quality: 80 })
+        .resize(400)
+        .toFile(routeImage);
     }
 
     const bookObject = req.file
